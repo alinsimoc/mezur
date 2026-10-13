@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mezur</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600&text=Mezur&display=swap"
+  />
+  <link rel="icon" href="favicon.png" />
+  <meta name="theme-color" content="#010409" />
+  <meta
+    name="description"
+    content="Rulers, distances and box model for any page, in a Chrome extension."
+  />
+  <style>
+    /* Dark theme (single theme on purpose), same palette as Unhooded with Mezur's pink accent */
+    :root {
+      color-scheme: dark;
+      --bg: #010409;
+      --fg: #f0f6fc;
+      --muted: #9198a1;
+      --card: #151b23;
+      --soft: #212830;
+      --line: #2a313c;
+      --link: #4493f8;
+      --accent: #ff2d78;
+      --accent-hover: #ff4a8c;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      position: relative;
+      min-height: 100vh;
+      overflow-x: clip;
+      color: var(--fg);
+      background:
+        radial-gradient(
+            70% 520px at 50% -80px,
+            rgba(255, 45, 120, 0.35),
+            rgba(124, 58, 237, 0.12) 55%,
+            transparent 80%
+          )
+          no-repeat,
+        var(--bg);
+      font:
+        16px/1.55 "Mona Sans",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        system-ui,
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      position: relative;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 48px 16px 64px;
+    }
+    footer {
+      margin-top: 48px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--link);
+    }
+
+    /* hero */
+    header {
+      text-align: center;
+      text-wrap: balance;
+    }
+    .logo {
+      width: 104px;
+      height: 104px;
+      display: block;
+      margin: 0 auto 8px;
+      filter: drop-shadow(0 12px 36px rgba(255, 45, 120, 0.55));
+    }
+    h1 {
+      font:
+        600 40px/1.1 Unbounded,
+        sans-serif;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .tagline {
+      font-size: 19px;
+      color: #d1d7e0;
+      margin: 8px 0 0;
+      letter-spacing: -0.01em;
+    }
+    .pitch {
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      text-wrap: balance;
+    }
+
+    /* cards: feature tiles and numbered steps share the same surface and title style */
+    .features li,
+    .steps > li {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+    .features b,
+    .steps div > b {
+      display: block;
+      font-weight: 600;
+    }
+    .features {
+      list-style: none;
+      margin: 32px 0 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      text-align: left;
+    }
+    .features li {
+      padding: 14px;
+    }
+    .features svg {
+      width: 34px;
+      height: 34px;
+      padding: 7px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: block;
+      background: rgba(255, 45, 120, 0.14);
+      color: var(--accent);
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .features span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+    .cta {
+      display: block;
+      margin-top: 10px;
+      text-align: center;
+      padding: 14px 28px;
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      transition:
+        background 0.2s,
+        transform 0.1s;
+    }
+    .cta:hover {
+      background: var(--accent-hover);
+    }
+    .cta:active {
+      transform: scale(0.98);
+    }
+    .try {
+      display: block;
+      margin: 16px auto 0;
+      padding: 8px 14px;
+      border: 0;
+      border-radius: 99px;
+      background: transparent;
+      color: var(--link);
+      font: inherit;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .try:hover,
+    .try:active {
+      background: var(--soft);
+    }
+
+
+    /* sections */
+    h2 {
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+      text-align: center;
+      margin: 56px 0 16px;
+    }
+    .steps {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+      counter-reset: s;
+    }
+    .steps > li {
+      counter-increment: s;
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+    }
+    .steps > li::before {
+      content: counter(s);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .steps div > span {
+      color: var(--muted);
+      font-size: 15px;
+    }
+    code {
+      font:
+        13px ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+      color: var(--fg);
+    }
+
+    /* shortcuts: key cap + what it does, like the on-page shortcut bar */
+    .keys {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px 16px;
+      align-items: start;
+      margin: 0;
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+    kbd {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 40px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: var(--soft);
+      box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+      font: 600 14px system-ui, sans-serif;
+    }
+    .keys dt {
+      padding-top: 1px;
+    }
+    .keys dd {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .keys dd b {
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* Magic sky: glows plus twinkling stars, at the top and in the bottom-right corner */
+    .sky {
+      position: absolute;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .sky.top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 560px;
+      background: radial-gradient(
+        35% 260px at 50% -40px,
+        rgba(255, 45, 120, 0.28),
+        transparent 75%
+      );
+      mask-image: radial-gradient(65% 100% at 50% 0, #000 35%, transparent 80%);
+    }
+    .sky.corner {
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 620px;
+      background:
+        radial-gradient(
+          40% 35% at 100% 100%,
+          rgba(254, 205, 225, 0.5),
+          transparent 70%
+        ),
+        radial-gradient(
+          100% 95% at 100% 100%,
+          rgba(255, 45, 120, 0.6),
+          rgba(124, 58, 237, 0.3) 45%,
+          transparent 78%
+        );
+      mask-image: radial-gradient(
+        90% 100% at 100% 100%,
+        #000 40%,
+        transparent 85%
+      );
+    }
+    .sky i {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 4px #fff;
+      font-style: normal;
+      animation: twinkle var(--d) ease-in-out infinite alternate;
+    }
+    .sky i.big {
+      width: auto;
+      height: auto;
+      background: none;
+      color: #fff;
+      font-size: 10px;
+      line-height: 1;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+      box-shadow: none;
+    }
+    @keyframes twinkle {
+      from {
+        opacity: calc(var(--o) * 0.15);
+      }
+      to {
+        opacity: var(--o);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .sky i {
+        animation: none;
+        opacity: var(--o);
+      }
+    }
+    /* GitHub star link: pill in the top-right corner */
+    .gh {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 99px;
+      border: 1px solid var(--line);
+      background: rgba(21, 27, 35, 0.7);
+      backdrop-filter: blur(8px);
+      color: var(--fg);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .gh:active {
+      background: var(--soft);
+    }
+    .gh svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+    .gh .count {
+      padding-left: 8px;
+      border-left: 1px solid var(--line);
+      color: var(--muted);
+    }
+    .gh.corner {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 10;
+    }
+    @media (min-width: 768px) {
+      .gh.corner {
+        position: fixed;
+      }
+    }
+  </style>
+
+  <a
+    class="gh corner"
+    href="https://github.com/alinsimoc/mezur"
+    target="_blank"
+    rel="noopener"
+    ><svg viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"
+      /></svg
+    ><span>Star</span><span class="count" hidden></span
+  ></a>
+  <div class="sky top" aria-hidden="true"></div>
+  <div class="sky corner" aria-hidden="true"></div>
+  <main>
+    <header>
+      <img class="logo" src="logo.png" alt="" />
+      <h1>Mezur</h1>
+      <p class="tagline">Measure any page, right in the browser.</p>
+      <p class="pitch">
+        Rulers, distances and the box model without
+        opening DevTools.
+      </p>
+      <ul class="features">
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 12h18M3 9v6M21 9v6M8 12v-2M12 12v-3M16 12v-2" /></svg
+          ><b>Measure</b><span>Spacing between elements.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <rect x="8" y="8" width="8" height="8" /></svg
+          ><b>Inspect</b><span>Box model, colors, radii, fonts.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 3h18v5H3zM3 8v13h5V8M7 3v2M11 3v3M15 3v2M3 12h2M3 16h3" /></svg
+          ><b>Rulers & guides</b><span>Drag out guides, saved per site.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg
+          ><b>Window size</b><span>Live width × height while resizing.</span>
+        </li>
+      </ul>
+      <button class="try">Try it on this page ›</button>
+    </header>
+
+
+    <h2>Install</h2>
+    <ol class="steps">
+      <li>
+        <div>
+          <b>Download and unzip</b
+          ><span>Keep the folder somewhere safe, Chrome runs Mezur from it.</span>
+          <a class="cta" href="https://github.com/alinsimoc/mezur/archive/refs/heads/main.zip">Download Mezur</a>
+        </div>
+      </li>
+      <li>
+        <div>
+          <b>Open extensions</b
+          ><span>Go to <code>chrome://extensions</code> and turn on
+            <b>Developer mode</b>.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <b>Load unpacked</b
+          ><span>Pick the <code>extension</code> folder inside it, then pin Mezur to your toolbar.</span>
+        </div>
+      </li>
+    </ol>
+
+
+    <h2>Shortcuts</h2>
+    <dl class="keys">
+      <dt><kbd>⌥</kbd></dt>
+      <dd>
+        <b>Measure.</b> Hover an element, hold Option, move to another to see
+        the distances between them.
+      </dd>
+      <dt><kbd>⌘</kbd></dt>
+      <dd>
+        <b>Inspect.</b> Box model of the hovered element plus colors, border
+        radius and font.
+      </dd>
+      <dt><kbd>R</kbd></dt>
+      <dd>
+        <b>Rulers.</b> Drag from a ruler to add a guide, drop it back to
+        delete.
+      </dd>
+    </dl>
+
+    <footer>Mezur v1.0 · MIT</footer>
+  </main>
+
+  <script>
+    // Demo: runs the extension's own content.js on this page with a small stand-in for the chrome.*
+    // APIs it uses (settings in localStorage, messages looped back), so nothing needs installing.
+    // Loaded fresh from extension/, so local edits show up on refresh.
+    const demo = (() => {
+      const listeners = { msg: [], changed: [] }
+      const KEY = "mezur-demo:"
+      const read = (k) => {
+        try {
+          const v = localStorage.getItem(KEY + k)
+          return v == null ? undefined : JSON.parse(v)
+        } catch {}
+      }
+      const chrome = {
+        runtime: {
+          id: "demo",
+          sendMessage: async (msg) => {
+            if (typeof msg?.icon === "boolean") return paint(msg.icon) // measure mode went on/off
+            for (const fn of listeners.msg) fn(msg, {}, () => {}) // frame-to-frame (just this page)
+          },
+          onMessage: { addListener: (fn) => listeners.msg.push(fn) },
+        },
+        storage: {
+          local: {
+            get: async (keys) => Object.fromEntries(keys.map((k) => [k, read(k)])),
+            set: async (o) => {
+              const changes = {}
+              for (const [k, v] of Object.entries(o)) {
+                try { localStorage.setItem(KEY + k, JSON.stringify(v)) } catch {}
+                changes[k] = { newValue: v }
+              }
+              for (const fn of listeners.changed) fn(changes, "local")
+            },
+          },
+          onChanged: { addListener: (fn) => listeners.changed.push(fn) },
+        },
+      }
+      const paint = (on) => {
+        document.body.classList.toggle("measuring", on)
+        for (const b of document.querySelectorAll(".try"))
+          b.textContent = on ? "Turn off measure mode" : "Try it on this page ›"
+      }
+      let loaded
+      return async () => {
+        loaded ||= fetch("extension/content.js")
+          .then((r) => r.text())
+          .then((src) => new Function("chrome", src)(chrome))
+        await loaded
+        for (const fn of listeners.msg) fn("measure", {}, () => {}) // what the popup switch sends
+      }
+    })()
+    for (const b of document.querySelectorAll(".try")) b.onclick = demo
+
+    // Live star count from GitHub; shown only once there is at least one star.
+    fetch("https://api.github.com/repos/alinsimoc/mezur")
+      .then((r) => r.json())
+      .then(({ stargazers_count: n }) => {
+        if (!(n > 0)) return
+        for (const el of document.querySelectorAll(".gh .count")) {
+          el.textContent = n.toLocaleString()
+          el.hidden = false
+        }
+      })
+      .catch(() => {})
+
+    // Scatter twinkling stars in each glow; a few are larger four-point sparkles.
+    for (const sky of document.querySelectorAll(".sky"))
+      for (let i = 0; i < 45; i++) {
+        const star = document.createElement("i")
+        star.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;--o:${0.3 + Math.random() * 0.7};--d:${2 + Math.random() * 3}s;animation-delay:-${Math.random() * 5}s`
+        if (Math.random() < 0.15) {
+          star.className = "big"
+          star.textContent = "✦"
+        }
+        sky.append(star)
+      }
+  </script>
+</html>

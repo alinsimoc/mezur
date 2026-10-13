@@ -1,0 +1,9 @@
+{
+  "name": "mezur",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "node dev.mjs"
+  }
+}

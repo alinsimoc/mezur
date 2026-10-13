@@ -7,16 +7,20 @@ Measuring tools for any page, as a Chrome extension.
 - **Measure mode**: switch it on in the panel. While it's on:
   - **⌥ Option** (hold): hover an element, hold Option, then move to another element to see the distances between the two. Before you move, it shows the spacing between every item of the list or grid the element is in
   - **⌘ Cmd** (hold), Inspect: box model of the hovered element (size, position, margin, border, padding) plus colors, border radius and font
-  - **R**: rulers and guides on/off (on by default, remembered across tabs). Rulers sit top and left, like Figma. Drag from a ruler to pull out a guide, drag a guide to move it, drop it back on the ruler to delete it. Guides are saved per site (host and port, so each local dev server keeps its own) and stay visible, click-through, outside measure mode.
+  - **R**: rulers and guides on/off (on by default, remembered across tabs). Rulers sit top and left, like Figma. Drag from a ruler to pull out a guide, drag a guide to move it, drop it back on the ruler to delete it. Guides are saved per site (host and port, so each local dev server keeps its own); like the rulers, they show only in measure mode.
 
 Distances and the box model show only while their key is held. Measuring and inspecting also work inside iframes. All values are CSS pixels relative to the viewport.
 
 ## Install
 
 1. Open `chrome://extensions` and turn on **Developer mode**.
-2. **Load unpacked** and pick this folder.
+2. **Load unpacked** and pick the `extension` folder.
 
 After editing, hit the reload icon on the extension card. To open the panel from the keyboard, set a shortcut for "Activate the extension" at `chrome://extensions/shortcuts`.
+
+## Website
+
+The repo root is the landing page (`index.html`), deployed to Netlify with no build step; the extension lives in `extension/`. `npm run dev` serves it at http://localhost:3001 with live reload. Its "Try it on this page" button runs `extension/content.js` right on the site, with a small stand-in for the `chrome.*` APIs, so you can try Mezur without installing it.
 
 ## License
 

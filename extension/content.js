@@ -72,7 +72,7 @@
     if (on) update();
   }, { signal });
 
-  // --- rulers (measure mode only) and guides (always visible, movable in measure mode) ---
+  // --- rulers and guides (measure mode only) ---
   let rulers = false, rulersDirty = true, bar = true; // bar: shortcut bar shown (popup setting)
   const rulersShown = () => rulers && on && isTop;
   const guides = add(h('div', 'display:none')); // before the rulers, so rulers paint over guide ends
@@ -138,9 +138,9 @@
     g.addEventListener('pointerup', up);
     move(e);
   };
-  // Guides inherit pointer-events from the container, which drawRulers switches with measure mode.
+  // Guides are only shown in measure mode, so they always take the pointer there.
   const guide = horiz => {
-    const g = h('div', `${Z}pointer-events:inherit;${horiz ? 'left:0;width:100%;height:5px;cursor:row-resize' : 'top:0;height:100%;width:5px;cursor:col-resize'}`);
+    const g = h('div', `${Z}pointer-events:auto;${horiz ? 'left:0;width:100%;height:5px;cursor:row-resize' : 'top:0;height:100%;width:5px;cursor:col-resize'}`);
     g.append(h('div', `position:absolute;background:#00a2ff;${horiz ? 'left:0;right:0;top:2px;height:1px' : 'top:0;bottom:0;left:2px;width:1px'}`));
     g.horiz = horiz;
     g.addEventListener('pointerdown', e => drag(g, e));
@@ -152,8 +152,7 @@
   // Visibility only; the canvases are (re)drawn in render, at most once per frame.
   const drawRulers = () => {
     for (const el of [rTop, rLeft]) show(el, rulersShown());
-    show(guides, rulers && isTop);
-    guides.style.pointerEvents = on ? 'auto' : 'none';
+    show(guides, rulersShown());
     rulersDirty = true;
     update();
   };
@@ -166,7 +165,8 @@
   if (isTop) {
     ext(() => chrome.storage.local.get(['rulers', 'bar', 'auto', siteKey])).then(s => {
       (bar = s?.bar ?? true), showBar(), setRulers(s?.rulers ?? true), loadGuides(s?.[siteKey]);
-      if (s?.auto) setOn(true), send(['on', true]); // popup setting: measure mode on as soon as a page loads
+      // Popup setting: measure mode on as soon as a page loads, unless it was turned off in this tab (survives reloads).
+      if (s?.auto && !offHere()) setOn(true), send(['on', true]);
     });
     // Changes from other tabs (the R toggle, guides on the same site) show up here too.
     ext(() => chrome.storage.onChanged.addListener(live(c => {
@@ -561,13 +561,17 @@
     paintHint();
     update();
   };
+  // Per tab and site: sessionStorage survives a reload but not closing the tab.
+  const OFF = 'mezur:off', offHere = () => { try { return !!sessionStorage.getItem(OFF); } catch {} };
   const setOn = v => {
     if (v === on) return;
     on = v;
     release();
     showBar();
     drawRulers();
-    if (isTop) ext(() => chrome.runtime.sendMessage({ icon: on })); // toolbar icon: colour while on
+    if (!isTop) return;
+    ext(() => chrome.runtime.sendMessage({ icon: on })); // toolbar icon: colour while on
+    try { on ? sessionStorage.removeItem(OFF) : sessionStorage.setItem(OFF, 1); } catch {} // sandboxed pages can't
   };
 
   // Measure mode is owned by the top page; the popup switch message reaches every frame,
