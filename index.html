@@ -536,7 +536,12 @@
         for (const fn of listeners.msg) fn("measure", {}, () => {}) // what the popup switch sends
       }
     })()
-    for (const b of document.querySelectorAll(".try")) b.onclick = demo
+    // Measuring needs a mouse; on touch-only devices just point people to desktop.
+    for (const b of document.querySelectorAll(".try"))
+      b.onclick = () =>
+        matchMedia("(pointer: coarse)").matches && !matchMedia("(any-pointer: fine)").matches
+          ? alert("Mezur needs a mouse. Open this page on a desktop browser to try it.")
+          : demo()
 
     // Live star count from GitHub; shown only once there is at least one star.
     fetch("https://api.github.com/repos/alinsimoc/mezur")
