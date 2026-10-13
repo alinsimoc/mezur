@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --bg: #fff; --fg: #18181b; --muted: #71717a; --line: #e4e4e7; --track: #d4d4d8; --accent: #ff2d78; --cap: #f4f4f5; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #18181b; --fg: #f4f4f5; --muted: #a1a1aa; --line: #27272a; --track: #3f3f46; --cap: #27272a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 280px; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, -apple-system, sans-serif; }
+  header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  header img { width: 24px; height: 24px; }
+  header b { font-size: 14px; }
+  section { padding: 6px 16px; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: 0; }
+  h2 { margin: 10px 0 2px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  label { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; cursor: pointer; }
+  label small { display: block; color: var(--muted); font-size: 11px; }
+  label.off { opacity: .45; cursor: default; }
+  /* On/off status: the first thing you see, tinted while measuring */
+  .status { padding: 12px 16px; transition: background .15s; }
+  .status.on { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .status label { padding: 0; }
+  .status b { display: block; font-size: 18px; line-height: 1.2; }
+  .status.on b { color: var(--accent); }
+  .status input[type=checkbox] { width: 46px; height: 28px; }
+  .status input[type=checkbox]::after { top: 3px; left: 3px; width: 22px; height: 22px; }
+  .status input[type=checkbox]:checked::after { transform: translateX(18px); }
+  /* iOS-style switch */
+  input[type=checkbox] { appearance: none; flex: none; width: 34px; height: 20px; margin: 0; border-radius: 999px; background: var(--track); position: relative; cursor: inherit; transition: background .15s; }
+  input[type=checkbox]::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px #0004; transition: transform .15s; }
+  input[type=checkbox]:checked { background: var(--accent); }
+  input[type=checkbox]:checked::after { transform: translateX(14px); }
+  input[type=checkbox]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; padding: 6px 0 12px; color: var(--muted); }
+  kbd { display: inline-flex; justify-content: center; min-width: 28px; padding: 2px 6px; border-radius: 999px; background: var(--cap); color: var(--fg); font: 12px system-ui, sans-serif; }
+</style>
+</head>
+<body>
+  <header><img id="logo" src="icons/off-48.png" alt=""><b>Mezur</b></header>
+  <section class="status" id="status">
+    <label id="measureRow">
+      <span><b id="stateTitle">Off</b><small id="stateHint">Turn on to measure this page</small></span>
+      <input type="checkbox" id="measure" aria-label="Measure mode on this page">
+    </label>
+  </section>
+  <section>
+    <h2>Settings</h2>
+    <label><span>Show toolbar<small>The shortcut bar at the bottom</small></span><input type="checkbox" id="bar"></label>
+    <label><span>Turn on when a page loads<small>Every site, every tab</small></span><input type="checkbox" id="auto"></label>
+  </section>
+  <section>
+    <h2>Shortcuts</h2>
+    <div class="keys">
+      <kbd>⌥</kbd><span>Hold to measure</span>
+      <kbd>⌘</kbd><span>Hold to inspect</span>
+      <kbd>R</kbd><span>Rulers on/off</span>
+    </div>
+  </section>
+  <script src="popup.js"></script>
+</body>
+</html>

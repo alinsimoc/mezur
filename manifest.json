@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Mezur",
-  "version": "0.1.0",
+  "version": "1.0",
   "description": "Window size while resizing, page rulers, and on-page distance and box-model measuring.",
   "icons": {
     "16": "icons/16.png",
@@ -10,10 +10,11 @@
     "128": "icons/128.png"
   },
   "action": {
-    "default_title": "Mezur: measure mode (Alt+Shift+M)",
+    "default_title": "Mezur",
+    "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/16.png",
-      "32": "icons/32.png"
+      "16": "icons/off-16.png",
+      "32": "icons/off-32.png"
     }
   },
   "background": {
@@ -27,25 +28,14 @@
       "js": [
         "content.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
     }
   ],
   "permissions": [
     "storage",
     "scripting",
     "activeTab"
-  ],
-  "commands": {
-    "_execute_action": {
-      "suggested_key": {
-        "default": "Alt+Shift+M"
-      }
-    },
-    "toggle-rulers": {
-      "suggested_key": {
-        "default": "Alt+Shift+R"
-      },
-      "description": "Toggle rulers"
-    }
-  }
+  ]
 }
